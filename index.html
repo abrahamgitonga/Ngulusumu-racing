@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ngulusumu Racer TWC</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: monospace;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: white;
+    }
+    #game-container {
+      position: relative;
+      width: 300px;
+      height: 500px;
+      background: #222;
+      overflow: hidden;
+      border: 3px solid #ff3366;
+      border-radius: 10px;
+    }
+    .road-line {
+      position: absolute;
+      width: 5px;
+      height: 30px;
+      background: white;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .car {
+      position: absolute;
+      width: 40px;
+      height: 60px;
+      background: red;
+      bottom: 20px;
+      left: 130px;
+      border-radius: 5px;
+    }
+    .obstacle {
+      position: absolute;
+      width: 40px;
+      height: 60px;
+      background: blue;
+      top: -60px;
+      border-radius: 5px;
+    }
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 1.2em;
+    }
+    .controls {
+      margin-top: 10px;
+      text-align: center;
+    }
+    .controls button {
+      padding: 10px;
+      font-size: 1em;
+      margin: 5px;
+      background: #ff3366;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div id="game-container">
+      <div id="score">Score: 0</div>
+      <div class="car" id="player-car"></div>
+    </div>
+    <div class="controls">
+      <button onclick="moveLeft()">⬅️ Left</button>
+      <button onclick="moveRight()">➡️ Right</button>
+    </div>
+  </div>
+
+  <script>
+    const car = document.getElementById('player-car');
+    const gameContainer = document.getElementById('game-container');
+    const scoreEl = document.getElementById('score');
+    let carLeft = 130;
+    let score = 0;
+  
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') moveLeft();
+      if (e.key === 'ArrowRight') moveRight();
+    });
+  
+    function moveLeft() {
+      if (carLeft > 10) {
+        carLeft -= 50;
+        car.style.left = carLeft + 'px';
+        console.log("Moved Left: ", carLeft);
+      }
+    }
+  
+    function moveRight() {
+      if (carLeft < 250) {
+        carLeft += 50;
+        car.style.left = carLeft + 'px';
+        console.log("Moved Right: ", carLeft);
+      }
+    }
+  
+    function isColliding(a, b) {
+      const aRect = a.getBoundingClientRect();
+      const bRect = b.getBoundingClientRect();
+      return !(
+        aRect.bottom < bRect.top ||
+        aRect.top > bRect.bottom ||
+        aRect.right < bRect.left ||
+        aRect.left > bRect.right
+      );
+    }
+  
+    function createObstacle() {
+      const obs = document.createElement('div');
+      obs.classList.add('obstacle');
+      obs.style.left = Math.floor(Math.random() * 6) * 50 + 'px';
+      gameContainer.appendChild(obs);
+  
+      let obsTop = -60;
+      const fall = setInterval(() => {
+        if (obsTop > 500) {
+          clearInterval(fall);
+          obs.remove();
+          score++;
+          scoreEl.textContent = `Score: ${score}`;
+          return;
+        }
+  
+        obsTop += 5;
+        obs.style.top = obsTop + 'px';
+  
+        if (isColliding(obs, car)) {
+          clearInterval(fall);
+          alert('Game Over! Score: ' + score);
+          window.location.reload();
+        }
+      }, 30);
+    }
+  
+    setInterval(createObstacle, 1500);
+  </script>
+  
+</body>
+</html>
